@@ -26,6 +26,8 @@ class _HomeLayoutState extends State<HomeLayout> {
   Database database;
   bool isBouttomSheetShown = false;
   var scaffoldkey = GlobalKey<ScaffoldState>();
+  var formkey = GlobalKey<FormState>();
+
   IconData FABicon = Icons.edit;
   var titleController = TextEditingController();
   var timeController = TextEditingController();
@@ -45,70 +47,75 @@ class _HomeLayoutState extends State<HomeLayout> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (isBouttomSheetShown) {
-            Navigator.pop(context);
-            isBouttomSheetShown = false;
+            if(formkey.currentState.validate()){
+              Navigator.pop(context);
+              isBouttomSheetShown = false;
+              setState(() {
+                FABicon = Icons.add;
+              });
+            }
 
-            setState(() {
-              FABicon = Icons.add;
-            });
           } else {
             scaffoldkey.currentState.showBottomSheet(
               (context) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   color: Colors.grey[200],
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        keyboardType: TextInputType.text,
-                        validator: (String value) {
-                          if (value.isEmpty) {
-                            return 'title must not be empty';
-                          }
-                          return null;
-                        },
+                  child: Form(
+                    key: formkey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          keyboardType: TextInputType.text,
+                          validator: (String value) {
+                            if (value.isEmpty) {
+                              return 'title must not be empty';
+                            }
+                            return null;
+                          },
 
-                        controller: titleController,
-                        //   onTap: ,
-                        decoration: InputDecoration(
-                          labelText: 'Task Title',
-                          prefixIcon: Icon(
-                            Icons.title,
+                          controller: titleController,
+                          //   onTap: ,
+                          decoration: InputDecoration(
+                            labelText: 'Task Title',
+                            prefixIcon: Icon(
+                              Icons.title,
+                            ),
+                            border: OutlineInputBorder(),
                           ),
-                          border: OutlineInputBorder(),
                         ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        keyboardType: TextInputType.datetime,
+                        SizedBox(
+                          height: 16,
+                        ),
+                        TextFormField(
+                          keyboardType: TextInputType.datetime,
 
-                        validator: (String value) {
-                          if (value.isEmpty) {
-                            return 'title must not be empty';
-                          }
-                          return null;
-                        },
-                        onTap: () {
-                         showTimePicker(context: context,
-                             initialTime: TimeOfDay.now(),
-                         ).then((value) {
-                           timeController.text=value.format(context).toString();
-                         });
-                        },
-                        controller: timeController,
+                          validator: (String value) {
+                            if (value.isEmpty) {
+                              return 'title must not be empty';
+                            }
+                            return null;
+                          },
+                          onTap: () {
+                           showTimePicker(context: context,
+                               initialTime: TimeOfDay.now(),
+                           ).then((value) {
+                             timeController.text=value.format(context).toString();
+                           });
+                          },
+                          controller: timeController,
 
-                        decoration: InputDecoration(
-                          labelText: 'Task Time',
-                          prefixIcon: Icon(
-                            Icons.watch_later_outlined,
+                          decoration: InputDecoration(
+                            labelText: 'Task Time',
+                            prefixIcon: Icon(
+                              Icons.watch_later_outlined,
+                            ),
+                            border: OutlineInputBorder(),
                           ),
-                          border: OutlineInputBorder(),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
