@@ -1,10 +1,12 @@
 import 'dart:ffi';
 
+import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:navigation/archived_tasks.dart';
 import 'package:navigation/done_tasks.dart';
 import 'package:sqflite/sqflite.dart';
+import 'constans.dart';
 import 'new_tasks.dart';
 
 class HomeLayout extends StatefulWidget {
@@ -77,13 +79,11 @@ class _HomeLayoutState extends State<HomeLayout> {
                           keyboardType: TextInputType.text,
                           validator: (String value) {
                             if (value.isEmpty) {
-                              return 'title must not be empty';
+                              return 'Title must not be empty';
                             }
                             return null;
                           },
-
                           controller: titleController,
-                          //   onTap: ,
                           decoration: InputDecoration(
                             labelText: 'Task Title',
                             prefixIcon: Icon(
@@ -157,7 +157,12 @@ class _HomeLayoutState extends State<HomeLayout> {
                   ),
                 ),
               ),
-            );
+            ).closed.then((value) {
+              isBouttomSheetShown = false;
+              setState(() {
+                FABicon = Icons.edit;
+              });
+            });
             isBouttomSheetShown = true;
             setState(() {
               FABicon = Icons.add;
@@ -195,7 +200,11 @@ class _HomeLayoutState extends State<HomeLayout> {
           ),
         ],
       ),
-      body: screen[currentIndex],
+      body: ConditionalBuilder(
+        builder:(context) =>screen[currentIndex] ,
+        condition: tasks.length >0 ,
+        fallback:(context) => CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -214,6 +223,11 @@ class _HomeLayoutState extends State<HomeLayout> {
       },
       onOpen: (database) {
         print('database opened');
+        getDataFromDatabase(database).
+        then((value){
+          tasks=value;
+          print(tasks[0]);
+        });
       },
     );
   }
@@ -233,5 +247,8 @@ class _HomeLayoutState extends State<HomeLayout> {
         print('Error when inserting new record ${error.toString()}');
       });
     });
+  }
+  Future<List<Map>> getDataFromDatabase(database) async{
+     return await  database.rawQuery('SELECT * FROM tasks');
   }
 }
